@@ -11,8 +11,12 @@ export const resend = new Resend(env.RESEND_API_KEY);
 
 export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
   async ({ identifier, url, provider }) => {
+    console.log("Starting email verification request...");
+    console.log("Provider:", provider);
+    console.log("URL:", url);
+
     const user = await getUserByEmail(identifier);
-    if (!user || !user.name) return;
+    console.log("User found:", user);
 
     const userVerified = user?.emailVerified ? true : false;
     const authSubject = userVerified
@@ -20,15 +24,16 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
       : "Activate your account";
 
     try {
+      console.log("Attempting to send email...");
+      console.log("From:", provider.from);
+      console.log("To:", identifier);
+
       const { data, error } = await resend.emails.send({
         from: provider.from,
-        to:
-          process.env.NODE_ENV === "development"
-            ? "delivered@resend.dev"
-            : identifier,
+        to: identifier,
         subject: authSubject,
         react: MagicLinkEmail({
-          firstName: user?.name as string,
+          firstName: user?.name || "there",
           actionUrl: url,
           mailType: userVerified ? "login" : "register",
           siteName: siteConfig.name,
@@ -40,12 +45,19 @@ export const sendVerificationRequest: EmailConfig["sendVerificationRequest"] =
         },
       });
 
-      if (error || !data) {
-        throw new Error(error?.message);
+      if (error) {
+        console.error("Resend API Error:", error);
+        throw new Error(error.message);
       }
 
-      // console.log(data)
+      if (!data) {
+        console.error("No data returned from Resend");
+        throw new Error("No data returned from Resend");
+      }
+
+      console.log("Email sent successfully:", data);
     } catch (error) {
+      console.error("Failed to send verification email:", error);
       throw new Error("Failed to send verification email.");
     }
   };

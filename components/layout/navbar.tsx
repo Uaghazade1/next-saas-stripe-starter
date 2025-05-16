@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useSelectedLayoutSegment, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 import { docsConfig } from "@/config/docs";
@@ -26,6 +26,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
   const scrolled = useScroll(50);
   const { data: session, status } = useSession();
   const { setShowSignInModal } = useContext(ModalContext);
+  const router = useRouter();
 
   const selectedLayout = useSelectedLayoutSegment();
   const documentation = selectedLayout === "docs";
@@ -120,7 +121,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
               variant="default"
               size="sm"
               rounded="full"
-              onClick={() => setShowSignInModal(true)}
+              onClick={() => router.push("/login")}
             >
               <span>Sign In</span>
               <Icons.arrowRight className="size-4" />

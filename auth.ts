@@ -23,7 +23,7 @@ export const {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
-    // error: "/auth/error",
+    error: "/auth/error",
   },
   callbacks: {
     async session({ token, session }) {
@@ -63,5 +63,5 @@ export const {
     },
   },
   ...authConfig,
-  // debug: process.env.NODE_ENV !== "production"
+  debug: true
 });
